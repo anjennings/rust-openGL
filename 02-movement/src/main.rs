@@ -28,8 +28,11 @@ fn main() {
     let vertex_shader_src = r#"
         #version 140
         in vec2 position;
+        uniform float t;
         void main() {
-            gl_Position = vec4(position, 0.0, 1.0);
+            vec2 pos = position;
+            pos.x += t;
+            gl_Position = vec4(pos, 0.0, 1.0);
         }
     "#;
 
@@ -50,6 +53,12 @@ fn main() {
         None
     ).unwrap();
 
+
+    let v1 = Vertex { position: [-0.5, -0.5] };
+    let v2 = Vertex { position: [ 0.0, 0.5 ] };
+    let v3 = Vertex { position: [ 0.5, -0.25 ] };
+    let shape = vec![v1, v2, v3];
+    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let mut t: f32 = -0.5;
 
     event_loop.run(move |ev, _, control_flow| {
@@ -74,17 +83,10 @@ fn main() {
         }
 
         // update 't'
-        t += 0.002;
+        t += 0.0005;
         if t > 0.5 {
             t = -0.5;
         }
-
-        let v1 = Vertex { position: [-0.5 + t, -0.5] };
-        let v2 = Vertex { position: [ 0.0 + t, 0.5 ] };
-        let v3 = Vertex { position: [ 0.5 + t, -0.25 ] };
-        let shape = vec![v1, v2, v3];
-
-        let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
 
         let mut target = display.draw();
         target.clear_color(0.0, 0.0, 1.0, 1.0);
@@ -92,7 +94,7 @@ fn main() {
             &vertex_buffer,
             &indices,
             &program,
-            &glium::uniforms::EmptyUniforms,
+            &glium::uniform! {t: t},  // &glium::uniforms::EmptyUniforms,
             &Default::default()
         ).unwrap();
         target.finish().unwrap();
