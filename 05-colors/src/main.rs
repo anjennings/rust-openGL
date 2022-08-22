@@ -28,18 +28,21 @@ fn main() {
     let vertex_shader_src = r#"
         #version 140
         in vec2 position;
+	out vec2 my_attr;
         uniform mat4 matrix;
         void main() {
-            gl_Position = matrix * vec4(position, 0.0, 1.0);
+	    my_attr = position;
+	    gl_Position = matrix * vec4(position, 0.0, 1.0);
         }
     "#;
 
     // Color(?) shader
     let fragment_shader_src = r#"
         #version 140
+	in vec2 my_attr;
         out vec4 color;
         void main() {
-            color = vec4(1.0, 0.0, 0.0, 1.0);
+            color = vec4(my_attr, -my_attr);
         }
     "#;
 
@@ -81,7 +84,7 @@ fn main() {
         }
 
         // update 't'
-        t += 0.0005;
+        t += 0.005;
         if t > 0.5 {
             t = -0.5;
         }
